@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Map view</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="openseadragon-bin-2.4.0/openseadragon.min.js"></script>
+</head>
+<body>
+
+<div id="openseadragon1" style="width: 800px; height: 600px;"></div>
+<script src="/openseadragon/openseadragon.min.js"></script>
+<script type="text/javascript">
+    var viewer = OpenSeadragon({
+        id: "openseadragon1",
+        prefixUrl: "/openseadragon-bin-2.4.0/images/",
+        tileSources: "http://hsimages.cogapp.com:8182/iiif/2/cogapp_hackday%2FWar_Office_Maps%2FWOOG_127_1_6.ptif/info.json"
+    });
+</script>
+
+</body>
+</html>
