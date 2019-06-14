@@ -5,17 +5,94 @@
     <title>Map view</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="openseadragon-bin-2.4.0/openseadragon.min.js"></script>
+    <style>
+        .navigator .highlight{
+            opacity:    0.4;
+            filter:     alpha(opacity=40);
+            outline:    2px solid #900;
+            background-color: #900;
+        }
+        .highlight{
+            opacity:    0.4;
+            filter:     alpha(opacity=40);
+            outline:    10px solid red; /* 12px auto #0A7EbE; */
+            background-color: white;
+        }
+        .highlight:hover, .highlight:focus{
+            filter:     alpha(opacity=70);
+            opacity:    0.7;
+            background-color: transparent;
+        }
+    </style>
+
 </head>
 <body>
 
 <div id="openseadragon1" style="width: 800px; height: 600px;"></div>
-<script src="/openseadragon/openseadragon.min.js"></script>
 <script type="text/javascript">
+
+    // convenience functions
+    $.urlParam = function(name){
+        var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        if (results==null){
+            return null;
+        }
+        else{
+            return results[1] || 0;
+        }
+    }
+
+    $.getCoords = function(name) {
+        $.each(window.ocr.responses[0].textAnnotations, function(i, v) {
+            if (v.description == name) {
+                console.log(v.boundingPoly);
+                return;
+            }
+        });
+
+    }
+
+    $.addOverlay = function(coords) {
+
+        // get a rectangle from bounding coordinates
+
+        var elt = document.createElement("div");
+        elt.id = "runtime-overlay";
+        elt.className = "highlight";
+        viewer.addOverlay({
+            element: elt,
+            location: viewer.viewport.imageToViewportRectangle(new OpenSeadragon.Rect(1200, 480, 100, 50))
+        });
+    }
+        // error trap
+    if (!$.urlParam('id')) {
+        alert ('you must specify a map ID in the query string. E.g. ?id=IOR_L_PS_10_595_0243')
+    }
+    var mapID = $.urlParam('id')
+    console.log($.urlParam('id'));
+
+    // load viewer
     var viewer = OpenSeadragon({
         id: "openseadragon1",
         prefixUrl: "/openseadragon-bin-2.4.0/images/",
-        tileSources: "http://hsimages.cogapp.com:8182/iiif/2/cogapp_hackday%2FWar_Office_Maps%2FWOOG_127_1_6.ptif/info.json"
+        tileSources: "http://hsimages.cogapp.com:8182/iiif/2/cogapp_hackday%2FWar_Office_Maps%2F" + $.urlParam('id') + ".ptif/info.json"
     });
+
+    // load data from file
+    $.getJSON('data/ocr_json/' + mapID + '.ptif.json', function(json) {
+        console.log(json);
+        window.ocr = json;
+
+        // test
+        console.log($.getCoords('FARAH'));
+
+        $.addOverlay($.getCoords('FARAH'));
+
+
+    });
+
+
+
 </script>
 
 </body>
