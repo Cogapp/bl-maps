@@ -24,8 +24,8 @@ results = []
 
 
 def find_xywh(coords):
-    min_x = 1000
-    min_y = 1000
+    min_x = 10000
+    min_y = 10000
     max_x = 0
     max_y = 0
     for pair in coords['vertices']:
@@ -36,7 +36,6 @@ def find_xywh(coords):
     return {'x': min_x, 'y': min_y, 'w': max_x - min_x, 'h': max_y - min_y}
 
 
-i = 0
 for word in words:
     if word['description'] not in exclude and len(word['description']) > 3:
         url = "http://api.geonames.org/searchJSON?maxRows=1&username=cogapp&q=" + word['description']
@@ -47,9 +46,6 @@ for word in words:
             result['xywh'] = find_xywh(word['boundingPoly'])
             results.append(result)
 
-        i += 1
-        if i > 10:
-            break
 
 with open('../docs/data/places_json/IOR_L_PS_10_595_0243.ptif.json', 'w') as file:
     json.dump(results, file)
