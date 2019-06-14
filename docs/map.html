@@ -52,17 +52,22 @@
 
     }
 
-    $.addOverlay = function(coords) {
+    $.addOverlay = function(data) {
 
         // get a rectangle from bounding coordinates
+        console.log(data)
 
         var elt = document.createElement("div");
         elt.id = "runtime-overlay";
         elt.className = "highlight";
         viewer.addOverlay({
             element: elt,
-            location: viewer.viewport.imageToViewportRectangle(new OpenSeadragon.Rect(1200, 480, 100, 50))
+            location: viewer.viewport.imageToViewportRectangle(new OpenSeadragon.Rect(1200, 480, 100, 50)),
+            clickHandler: function(event) {
+                alert('ok');
+            }
         });
+        console.log('done overlay')
     }
         // error trap
     if (!$.urlParam('id')) {
@@ -76,17 +81,44 @@
         id: "openseadragon1",
         prefixUrl: "/openseadragon-bin-2.4.0/images/",
         tileSources: "http://hsimages.cogapp.com:8182/iiif/2/cogapp_hackday%2FWar_Office_Maps%2F" + $.urlParam('id') + ".ptif/info.json"
-    });
+    }).addHandler('open', function(e){
+        console.log('opened')
+        var viewer = e.eventSource
 
-    // load data from file
-    $.getJSON('data/ocr_json/' + mapID + '.ptif.json', function(json) {
-        console.log(json);
-        window.ocr = json;
+        // load data from file
+        $.getJSON('data/places_json/' + mapID + '.ptif.json', function(json) {
+            console.log(json);
+            window.ocr = json;
+
+            // create overlays
+            $.each(window.ocr, function(i, v) {
+                // console.log(i,v);
+                var o = v
+                // console.log(o)
+                if (o && 'xywh' in o) {
+                    console.log('Location: ' + o['description']);
+                    var elt = document.createElement("div");
+                    elt.id = "runtime-overlay";
+                    elt.className = "highlight";
+                    viewer.addOverlay({
+                        element: elt,
+                        location: viewer.viewport.imageToViewportRectangle(new OpenSeadragon.Rect(o['xywh']['x'], o['xywh']['y'], o['xywh']['w'], o['xywh']['h'])),
+                        clickHandler: function(event) {
+                            alert('ok');
+                        }
+                    });
+                    console.log('done overlay')
+                }
+            });
+
+
+        });
+
 
         // test
-        console.log($.getCoords('FARAH'));
+        //console.log($.getCoords('FARAH'));
 
-        $.addOverlay($.getCoords('FARAH'));
+        // $.addOverlay('foo');
 
 
     });
