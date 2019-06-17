@@ -96,10 +96,11 @@
                 var o = v
                 // console.log(o)
                 if (o && 'xywh' in o) {
-                    console.log('Location: ' + o['description']);
+                    console.log('Location: ' + o['toponymName'] + ', ' + o['name'] + '. Population: ' + o['population']);
                     var elt = document.createElement("div");
                     elt.id = "runtime-overlay";
                     elt.className = "highlight";
+                    //elt.attributes('data-display', o['toponymName'] + ', ' + o['name'] + '. Population: ' + o['population'])
                     viewer.addOverlay({
                         element: elt,
                         location: viewer.viewport.imageToViewportRectangle(new OpenSeadragon.Rect(o['xywh']['x'], o['xywh']['y'], o['xywh']['w'], o['xywh']['h'])),
