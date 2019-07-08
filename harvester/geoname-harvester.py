@@ -1,7 +1,7 @@
 import json
 import requests
-import json
-import requests
+import re
+import statistics
 
 # Import the json files
 with open("../docs/data/ocr_json/IOR_L_PS_10_595_0243.ptif.json", "r") as read_file:
@@ -20,6 +20,7 @@ exclude = ['Miles', 'Inches', '..', '.', 'Scale', "", "i", "me", "my", "myself",
            "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same",
            "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now", '&']
 
+interim_results = []
 results = []
 
 
@@ -36,16 +37,55 @@ def find_xywh(coords):
     return {'x': min_x, 'y': min_y, 'w': max_x - min_x, 'h': max_y - min_y}
 
 
+def hasNumbers(inputString):
+    return bool(re.search(r'\d', inputString))
+
+def get_bounding_box(results, sensitivity = 0.75):
+    """
+    :param results: An array of GeoNames results
+    :param sensitivity: Multiplier for sigma in bounding box
+    :return: [minX, minY, maxX, maxY]
+    """
+    lats = [float(result['lat']) for result in results]
+    lngs = [float(result['lng']) for result in results]
+
+    mean_lng = statistics.mean(lngs)
+    mean_lat = statistics.mean(lats)
+
+    sigma_lng = statistics.stdev(lngs)
+    sigma_lat = statistics.stdev(lats)
+
+    return [
+        mean_lng - sensitivity * sigma_lng,
+        mean_lat - sensitivity * sigma_lat,
+        mean_lng + sensitivity * sigma_lng,
+        mean_lat + sensitivity * sigma_lat,
+    ]
+
+
+def in_bounding_box (result, bounding_box):
+    lng, lat = float(result['lng']), float(result['lat'])
+
+    if bounding_box[0] < lng < bounding_box[2] and bounding_box[1] < lat < bounding_box[3]:
+        return True
+
+    return False
+
+
 for word in words:
-    if word['description'] not in exclude and len(word['description']) > 3:
-        url = "http://api.geonames.org/searchJSON?maxRows=1&username=cogapp&q=" + word['description']
+    if word['description'] not in exclude and len(word['description']) > 4 and hasNumbers(word['description']) is False:
+        url = "http://api.geonames.org/searchJSON?maxRows=1&username=cogapp&featureClass=A&name=" + word['description']
         response = requests.get(url)
         if len(response.json()['geonames']) > 0:
             result = response.json()['geonames'][0]
             result['description'] = word['description']
             result['xywh'] = find_xywh(word['boundingPoly'])
-            results.append(result)
+            interim_results.append(result)
 
+bounding_box = get_bounding_box(interim_results)
+
+results = [result for result in interim_results if in_bounding_box(result, bounding_box)
+                                                and result['population'] > 0]
 
 with open('../docs/data/places_json/IOR_L_PS_10_595_0243.ptif.json', 'w') as file:
     json.dump(results, file)
