@@ -7,7 +7,7 @@
         .highlight{
             opacity:    0.4;
             filter:     alpha(opacity=40);
-            outline:    5px auto #0A7EbE;
+            outline:    5px solid #900; /* 5px auto #0A7EbE; */
             background-color: white;
         }
         .highlight:hover, .highlight:focus{
@@ -18,9 +18,17 @@
 
         .container {
             display: flex;
+            overflow: auto;
+        }
+
+        #openseadragon1 {
+            flex: 0 0 700px;
+            height: 600px;
+            background: lightgray;
         }
 
         .info-panel {
+            flex: 0 0 300px;
             margin: 3px;
             padding: 10px;
         }

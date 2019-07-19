@@ -20,36 +20,25 @@
 
     }
 
-    $.addOverlay = function(data) {
-
-        // get a rectangle from bounding coordinates
-        console.log(data)
-
-        var elt = document.createElement("div");
-        elt.id = "runtime-overlay";
-        elt.className = "highlight";
-        viewer.addOverlay({
-            element: elt,
-            location: viewer.viewport.imageToViewportRectangle(new OpenSeadragon.Rect(1200, 480, 100, 50)),
-            clickHandler: function(event) {
-            }
-        });
-    }
-
     $.createSidePanel = function(index) {
         var data = window.ocr[index];
-        $('.container').append('<div class="info-panel"> \
-                    <h2>' + data.name + '</h2> \
-                    <ul> \
-                    <li>Population: ' + data.population + '</li> \
+        var desc = '<h2>' + data.name + '</h2> \
+                    <ul>';
+
+        if (data.name != data.toponymName) {
+            desc += '<li>Alternate name: ' + data.toponymName + '</li>';
+        }
+
+        desc +=    '<li>Population: ' + data.population + '</li> \
                     <li>Country: ' + data.countryName + '</li> \
                     <li>(From OCR: ' + data.description + ')</li> \
-                    </ul> \
-                    </div>')
+                    </ul>';
+
+        $('.info-panel').html(desc)
     }
 
     $.destroySidePanel = function() {
-        $('.info-panel').remove();
+        $('.info-panel').html('');
     }
 
         // error trap
@@ -80,14 +69,21 @@
                     var elt = document.createElement("div");
                     elt.id = "runtime-overlay";
                     elt.className = "highlight";
-                    //elt.attributes('data-display', o['toponymName'] + ', ' + o['name'] + '. Population: ' + o['population'])
+                    elt.setAttribute('data-idx', i);
                     viewer.addOverlay({
                         element: elt,
-                        location: viewer.viewport.imageToViewportRectangle(new OpenSeadragon.Rect(o['xywh']['x'], o['xywh']['y'], o['xywh']['w'], o['xywh']['h'])),
-                        clickHandler: function(event) {
-                            alert('ok');
-                        }
+                        location: viewer.viewport.imageToViewportRectangle(new OpenSeadragon.Rect(o['xywh']['x'], o['xywh']['y'], o['xywh']['w'], o['xywh']['h']))
                     });
+                    new OpenSeadragon.MouseTracker({
+                        element: elt,
+                        enterHandler: function(e) {
+                            $.createSidePanel(elt.getAttribute('data-idx'))
+                        },
+                        exitHandler: function(e) {
+                            $.destroySidePanel();
+                        },
+                    });
+
                 }
             });
 
@@ -95,10 +91,6 @@
         });
 
 
-        // test
-        //console.log($.getCoords('FARAH'));
-
-        // $.addOverlay('foo');
 
 
     });
