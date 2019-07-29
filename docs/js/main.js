@@ -51,7 +51,7 @@
     // load viewer
     var viewer = OpenSeadragon({
         id: "openseadragon1",
-        prefixUrl: "/openseadragon-bin-2.4.0/images/",
+        prefixUrl: "openseadragon-bin-2.4.0/images/",
         tileSources: "https://images.cogapp.com/iiif/" + $.urlParam('id') + ".ptif/info.json"
     }).addHandler('open', function(e){
         var viewer = e.eventSource
