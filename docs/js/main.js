@@ -52,7 +52,7 @@
     var viewer = OpenSeadragon({
         id: "openseadragon1",
         prefixUrl: "/openseadragon-bin-2.4.0/images/",
-        tileSources: "http://hsimages.cogapp.com:8182/iiif/2/cogapp_hackday%2FWar_Office_Maps%2F" + $.urlParam('id') + ".ptif/info.json"
+        tileSources: "https://images.cogapp.com/iiif/" + $.urlParam('id') + ".ptif/info.json"
     }).addHandler('open', function(e){
         var viewer = e.eventSource
 
